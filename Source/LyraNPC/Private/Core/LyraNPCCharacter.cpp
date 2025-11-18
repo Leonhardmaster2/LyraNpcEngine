@@ -7,6 +7,7 @@
 #include "Components/LyraNPCScheduleComponent.h"
 #include "Navigation/LyraNPCPathFollowingComponent.h"
 #include "Components/LyraNPCSocialComponent.h"
+#include "Components/LyraNPCGOAPComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Net/UnrealNetwork.h"
 #include "LyraNPCModule.h"
@@ -21,6 +22,7 @@ ALyraNPCCharacter::ALyraNPCCharacter(const FObjectInitializer& ObjectInitializer
 	ScheduleComponent = CreateDefaultSubobject<ULyraNPCScheduleComponent>(TEXT("ScheduleComponent"));
 	PathFollowingComponent = CreateDefaultSubobject<ULyraNPCPathFollowingComponent>(TEXT("PathFollowingComponent"));
 	SocialComponent = CreateDefaultSubobject<ULyraNPCSocialComponent>(TEXT("SocialComponent"));
+	GOAPComponent = CreateDefaultSubobject<ULyraNPCGOAPComponent>(TEXT("GOAPComponent"));
 
 	// Set default AI controller class
 	AIControllerClass = nullptr; // Will be set to LyraNPCAIController in Blueprint or manually

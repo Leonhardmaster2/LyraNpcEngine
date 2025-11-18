@@ -13,6 +13,7 @@ class ULyraNPCNeedsComponent;
 class ULyraNPCScheduleComponent;
 class ULyraNPCPathFollowingComponent;
 class ULyraNPCSocialComponent;
+class ULyraNPCGOAPComponent;
 
 /**
  * Base character class for LyraNPC.
@@ -46,6 +47,9 @@ public:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "LyraNPC|Components")
 	TObjectPtr<ULyraNPCSocialComponent> SocialComponent;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "LyraNPC|Components")
+	TObjectPtr<ULyraNPCGOAPComponent> GOAPComponent;
 
 	// ===== CONFIGURATION =====
 
