@@ -59,6 +59,32 @@ The most comprehensive and intelligent NPC AI system for creating living, breath
   - Alert levels (Unaware → Combat)
   - Memory of threats and events
 
+- **GOAP (Goal-Oriented Action Planning)** - Dynamic planning system:
+  - A* pathfinding-based multi-step action planning
+  - NPCs formulate plans to achieve complex goals
+  - Cognitive skill affects planning depth (smart NPCs plan further ahead)
+  - Automatic replanning when circumstances change
+  - World state management with automatic updates
+  - Cost-based action selection
+  - Built-in actions: Eat, Sleep, Socialize, Use Task
+
+- **Group Coordination** - Tactical group behavior:
+  - Shared knowledge between group members
+  - Formation-based movement (Line, Column, Wedge, Circle, Shield, Scatter)
+  - Coordinated group actions and tactics
+  - Emotional contagion (fear/aggression spreading through group)
+  - Dynamic role assignment (Leader, Scout, Flanker, Support, etc.)
+  - Group decision-making with influence voting
+  - Automatic tactical adjustments (retreat, advance, hold)
+  - Enemy sighting and threat reporting
+
+- **Social Relationships** - NPC-to-NPC interactions:
+  - Relationship tracking (Family, Friend, Enemy, Rival, etc.)
+  - Affinity, trust, and familiarity systems
+  - Relationship decay over time
+  - Personality compatibility calculations
+  - Social influences on behavior
+
 ## Quick Start Guide
 
 ### 1. Add to Your Project
@@ -172,24 +198,141 @@ PathComp->bLoopPath = true;
 - Movement styles
 - Loop/ping-pong modes
 
+### ULyraNPCSocialComponent
+- Relationship management
+- Affinity and trust tracking
+- Social interaction handling
+- Compatibility calculations
+- Friend/Enemy lists
+
+### ULyraNPCGOAPComponent
+- Goal selection and prioritization
+- Action plan creation using A*
+- World state management
+- Plan execution and monitoring
+- Automatic replanning
+- Available actions library
+
+### ULyraNPCGroupCoordinationComponent
+- Group membership management
+- Formation configuration
+- Shared knowledge pool
+- Coordinated action execution
+- Group mood tracking
+- Tactical decision making
+
 ## Behavior Tree Nodes
 
 ### Tasks
 - **Find Best Task** - Locates optimal task based on needs/schedule
 - **Use Task** - Performs task for duration with need satisfaction
 - **Follow Path** - Follows predetermined patrol/travel route
+- **Execute GOAP Plan** - Creates and executes multi-step GOAP plans
+- **Join Group** - Finds and joins a nearby group
+- **Follow Formation** - Maintains formation position within group
+- **Share Group Knowledge** - Reports information to group members
 
 ### Services
 - **Update NPC State** - Keeps blackboard synced with components
+- **Update GOAP State** - Refreshes GOAP world state and goal priorities
 
 ### Decorators
 - **Check Need** - Conditional based on need value
+- **Check GOAP Goal** - Checks if specific GOAP goal is active
 
 ## EQS Integration
 
 - **Task Generator** - Finds available tasks within radius
 - Automatically scores tasks by NPC needs
 - Filters by type, availability, and access
+
+## Using GOAP (Goal-Oriented Action Planning)
+
+NPCs with GOAPComponent automatically plan multi-step actions to achieve goals:
+
+```cpp
+// GOAP is integrated automatically - NPCs will plan based on their needs
+// You can also create custom GOAP actions:
+
+UCLASS()
+class UMyCustomGOAPAction : public ULyraNPCGOAPAction
+{
+    GENERATED_BODY()
+
+public:
+    UMyCustomGOAPAction()
+    {
+        ActionName = FName("MyAction");
+
+        // Define what must be true to execute
+        Preconditions.StateFlags.Add(FName("HasTool"), true);
+
+        // Define what becomes true after execution
+        Effects.StateFlags.Add(FName("TaskComplete"), true);
+
+        Cost.BaseCost = 5.0f;
+    }
+
+    virtual bool TickAction(ALyraNPCCharacter* NPC, float DeltaTime) override
+    {
+        // Execute your action logic
+        return false; // Return false when complete
+    }
+};
+```
+
+**Accessing GOAP in Blueprints:**
+- Execute GOAP Plan BT task automatically handles planning
+- Check GOAP Goal decorator allows conditional branching
+- Update GOAP State service keeps plans fresh
+
+## Using Group Coordination
+
+Create coordinated NPC groups with shared tactics:
+
+```cpp
+// Create a group coordination component on an actor (e.g., squad manager)
+ULyraNPCGroupCoordinationComponent* Group = CreateDefaultSubobject<ULyraNPCGroupCoordinationComponent>(TEXT("SquadGroup"));
+Group->GroupId = FName("GuardSquad01");
+Group->MaxGroupSize = 8;
+Group->bUseFormations = true;
+Group->bShareKnowledge = true;
+
+// NPCs can join groups via BT task or code
+Group->AddMember(NPCCharacter, ELyraNPCGroupRole::Leader);
+
+// Set formation and tactics
+Group->SetFormation(ELyraNPCGroupFormation::Wedge);
+Group->UpdateFormation(SquadCenter, ForwardDirection);
+Group->SetTactic(ELyraNPCGroupTactic::Advance);
+
+// Share knowledge with the group
+Group->ReportEnemySighting(EnemyActor, EnemyLocation, NPCId, 0.9f);
+
+// Check group status
+if (Group->ShouldRetreat())
+{
+    Group->SetTactic(ELyraNPCGroupTactic::Retreat);
+}
+```
+
+**Group Formations:**
+- **Line** - Horizontal formation, good for defensive positions
+- **Column** - Follow-the-leader, good for travel
+- **Wedge** - V-shape with leader at point, good for assault
+- **Circle** - Defensive perimeter
+- **Shield** - Tight defensive line
+- **Scatter** - Spread out, good for avoiding area attacks
+
+**Group Roles:**
+- **Leader** - Makes decisions, highest influence
+- **Scout** - Explores ahead, high perception
+- **Flanker** - Attacks from sides
+- **Support** - Assists allies
+- **HeavyHitter** - Main damage dealer
+- **Defender** - Protects group
+- **Medic** - Heals allies
+- **Follower** - General group member
 
 ## World Subsystem
 
